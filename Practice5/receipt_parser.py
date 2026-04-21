@@ -1,44 +1,92 @@
 import re
-def solve_tasks():
-        with open('raw.txt', 'r', encoding='utf-8') as file:
-            content = file.read()
-            lines = content.splitlines()
+import json
 
-        # 1
-        print("1. 'ab*':", re.findall(r'ab*', content)[:5])
+with open("raw.txt", "r", encoding="utf-8") as f:
+        text = f.read()
 
-        # 2
-        print("2. 'ab{2,3}':", re.findall(r'ab{2,3}', content)[:5])
+def function(text):
+    data = {
+        "products": [],
+        "total_price": 0.0,
+        "date_time": "",
+        "payment_method": "",
+    }
 
-        # 3
-        print("3. snake_case:", re.findall(r'[a-z]+_[a-z]+', content)[:5])
-
-        # 4
-        print("4. Upper + lower:", re.findall(r'[A-Z][a-z]+', content)[:5])
-
-        # 5
-        task5 = [l for l in lines if re.search(r'^a.*b$', l)]
-        print("5. Start 'a', end 'b':", task5[:3])
-
-        # 6
-        print("6. Replace:", re.sub(r'[ ,.]', ':', content[:50]))
-
-        # 7
-        def to_camel(s):
-            words = s.split('_')
-            return words[0] + ''.join(w.capitalize() for w in words[1:])
-        print("7. Snake to Camel:", to_camel("snake_case_string"))
+    products = re.findall(r'(\d+)\.\n(.*?)\n([\d,]+)\s+x\s+([\d, ]+)\n([\d, ]+)', text, re.DOTALL)
+    
+    for prod in products:
+        name = prod[1].replace('\n', ' ').strip()
+        price = float(prod[2].replace(',', '.'))
+        price_per_unit = float(prod[3].replace(' ', '').replace(',', '.'))
+        total_price = float(prod[4].replace(' ', '').replace(',', '.'))
         
-        # 8
-        print("8. Split at Upper:", re.findall(r'[A-Z][^A-Z]*', "SplitThisString"))
+        data["products"].append({
+            "name": name,
+            "price": price,
+            "price_per_unit": price_per_unit,
+            "total_price": total_price
+        })
 
-        # 9
-        print("9. Insert spaces:", re.sub(r"(\w)([A-Z])", r"\1 \2", "InsertSpacesHere"))
+    total = re.search(r'ИТОГО:\s+([\d\s,]+)', text)
+    if total:
+        data["total_price"] = float(total.group(1).replace(' ', '').replace(',', '.'))
 
-        # 10
-        def to_snake(s):
-            return re.sub(r'(?<!^)(?=[A-Z])', '_', s).lower()
-        print("10. Camel to Snake:", to_snake("CamelCaseString"))
+    date_time = re.search(r'Время:\s+(\d{2}\.\d{2}\.\d{4}\s+\d{2}:\d{2}:\d{2})', text)
+    if date_time:
+        data["date_time"] = date_time.group(1)
 
-if __name__ == "__main__":
-    solve_tasks()
+    if "Банковская карта" in text:
+        data["payment_method"] = "Card"
+    elif "Наличные" in text:
+        data["payment_method"] = "Cash"
+
+    return data
+
+if text:
+    parsed_result = function(text)
+    print(json.dumps(parsed_result, indent=4))
+
+#--------------------------------------------------------
+
+n = (input()) 
+
+def a1(text):
+        return re.findall(r'ab*', text)
+
+def a2(text):
+        return re.findall(r'ab{2,3}', text)
+
+def a3(text):
+        return re.findall(r'[a-z]+_[a-z]+', text)
+def a4(text):
+        return re.findall(r'[A-Z][a-z]+', text)
+
+def a5(text):
+        return re.findall(r'a.*b$', text)
+
+def a6(text):
+        return re.sub(r'[ ,.]', ':', text)
+
+def a7(text):
+        return "".join(word.capitalize() for word in text.split('_'))
+
+def a8(text):
+        return re.findall(r'[A-Z][^A-Z]*', text)
+
+def a9(text):
+        return re.sub(r'(\w)([A-Z])', r'\1 \2', text)
+
+def a10(text):
+        s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', text)
+        return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+print(a1(n), 1)
+print(a2(n), 2)
+print(a3(n), 3)
+print(a4(n), 4)
+print(a5(n), 5)
+print(a6(n), 6)
+print(a7(n), 7)
+print(a8(n), 8)
+print(a9(n), 9)
+print(a10(n),10)
